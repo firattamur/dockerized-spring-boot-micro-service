@@ -1,0 +1,25 @@
+# java runtime base image
+FROM openjdk:17-jdk-slim as build
+
+# application jar file
+ARG JAR_FILE
+
+# copy jar file to image
+COPY ${JAR_FILE} app.jar
+
+# unpack jar file
+RUN mkdir -p target/dependency && (cd target/dependency; jar -xf /app.jar)
+
+# java runtime base image
+FROM openjdk:17-jre-slim
+
+# volume for temporary files
+VOLUME /tmp
+
+# copy jar file and dependencies to image
+COPY --from=build target/dependency/BOOT-INF/lib /app/lib
+COPY --from=build target/dependency/META-INF /app/META-INF
+COPY --from=build target/dependency/BOOT-INF/classes /app
+
+# set entrypoint
+ENTRYPOINT ["java","-cp","app:app/lib/*","com.firattamur.dockerizedspringbootmicroservice.DockerizedSpringBootMicroserviceApplication"]

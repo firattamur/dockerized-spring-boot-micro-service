@@ -1,0 +1,29 @@
+# java runtime base image
+FROM openjdk:17-jdk-slim as build
+
+# set working directory
+WORKDIR /app
+
+# application jar file
+ARG JAR_FILE
+
+# copy jar file to working directory
+COPY ${JAR_FILE} app.jar
+
+# extract jar file
+RUN java -Djarmode=layertools -jar app.jar extract
+
+# java run time base image
+FROM openjdk:17-jdk-slim
+
+# set working directory
+WORKDIR /app
+
+# copy extracted jar file to working directory
+COPY --from=build /app/dependencies/ ./
+COPY --from=build /app/spring-boot-loader/ ./
+COPY --from=build /app/snapshot-dependencies/ ./
+COPY --from=build /app/application/ ./
+
+# set entry point
+ENTRYPOINT ["java", "org.springframework.boot.loader.JarLauncher"]

@@ -1,0 +1,22 @@
+version: "3.7"
+
+services:
+
+  dockerized-spring-boot-micro-service:
+
+    image: firattamur/dockerized-spring-boot-micro-service:0.0.1-SNAPSHOT
+
+    ports:
+      - "8080:8080"
+
+    environment:
+      - "SPRING_PROFILES_ACTIVE=dev"
+
+    networks:
+      backend:
+        aliases:
+          - "dockerized-spring-boot-app"
+
+networks:
+    backend:
+        driver: bridge

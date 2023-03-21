@@ -1,0 +1,11 @@
+# java runtime base image
+FROM openjdk:17-jdk-slim
+
+# application JAR file
+ARG JAR_FILE=target/*.jar
+
+# copy JAR file into image
+COPY ${JAR_FILE} app.jar
+
+# run application with this command line
+ENTRYPOINT ["java","-jar","/app.jar"]
