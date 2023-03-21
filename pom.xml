@@ -1,41 +1,99 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
-	<modelVersion>4.0.0</modelVersion>
-	<parent>
-		<groupId>org.springframework.boot</groupId>
-		<artifactId>spring-boot-starter-parent</artifactId>
-		<version>3.0.4</version>
-		<relativePath/> <!-- lookup parent from repository -->
-	</parent>
-	<groupId>com.firattamur</groupId>
-	<artifactId>dockerized-spring-boot-micro-service</artifactId>
-	<version>0.0.1-SNAPSHOT</version>
-	<name>dockerized-spring-boot-micro-service</name>
-	<description>Dockerized Spring Boot Micro Service</description>
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-starter-parent</artifactId>
+        <version>3.0.4</version>
+        <relativePath/> <!-- lookup parent from repository -->
+    </parent>
+    <groupId>com.firattamur</groupId>
+    <artifactId>dockerized-spring-boot-micro-service</artifactId>
+    <version>0.0.1-SNAPSHOT</version>
+    <name>dockerized-spring-boot-micro-service</name>
+    <description>Dockerized Spring Boot Micro Service</description>
+
 	<properties>
 		<java.version>17</java.version>
+		<docker.image.prefix>firattamur</docker.image.prefix>
 	</properties>
+
 	<dependencies>
-		<dependency>
-			<groupId>org.springframework.boot</groupId>
-			<artifactId>spring-boot-starter-web</artifactId>
-		</dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-web</artifactId>
+        </dependency>
 
-		<dependency>
-			<groupId>org.springframework.boot</groupId>
-			<artifactId>spring-boot-starter-test</artifactId>
-			<scope>test</scope>
-		</dependency>
-	</dependencies>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-test</artifactId>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
 
-	<build>
-		<plugins>
-			<plugin>
-				<groupId>org.springframework.boot</groupId>
-				<artifactId>spring-boot-maven-plugin</artifactId>
-			</plugin>
-		</plugins>
-	</build>
+    <build>
+        <!-- Wubba lubba dub dub! Time to define our build plugins, Morty! -->
+        <plugins>
+
+            <!-- The Spring Boot Maven plugin, Morty. It's essential, trust me. -->
+            <plugin>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-maven-plugin</artifactId>
+
+                <!-- Configuring the plugin like a pro, Morty! -->
+                <configuration>
+                    <!-- Image configuration, setting its name using variables. It's like magic, Morty! -->
+                    <image>
+                        <name>${docker.image.prefix}/${project.artifactId}:latest</name>
+
+                        <!-- Building arguments for the image, Morty. We're getting the JAR file location here. -->
+                        <buildArgs>
+                            <JAR_FILE>target/${project.build.finalName}.jar</JAR_FILE>
+                        </buildArgs>
+                    </image>
+
+                    <!-- Enabling layers for more efficient image building. Yeah, science, Morty! -->
+                    <layers>
+                        <enabled>true</enabled>
+                    </layers>
+                </configuration>
+            </plugin>
+
+            <!-- The Docker plugin, Morty! It's from Spotify, and no, it doesn't play music. -->
+            <plugin>
+                <groupId>com.spotify</groupId>
+                <artifactId>dockerfile-maven-plugin</artifactId>
+                <version>1.4.13</version>
+
+                <!-- Configuring the Docker plugin, Morty. Look at all these variables! -->
+                <configuration>
+                    <repository>${docker.image.prefix}/${project.artifactId}</repository>
+                    <!-- And now we're setting the tag, Morty! Using the project version, of course. -->
+                    <tag>${project.version}</tag>
+
+                    <!-- More build arguments, Morty! We need that JAR file location again. -->
+                    <buildArgs>
+                        <JAR_FILE>target/${project.build.finalName}.jar</JAR_FILE>
+                    </buildArgs>
+                </configuration>
+
+                <!-- Executions, Morty! This is where the real action happens. -->
+                <executions>
+                    <!-- Defining an execution, because we're all about executing, Morty! -->
+                    <execution>
+                        <id>default</id>
+                        <phase>install</phase>
+
+                        <!-- Time for the goals, Morty! Building and pushing the image. Aw, geez, it's exciting! -->
+                        <goals>
+                            <goal>build</goal>
+                            <goal>push</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
 
 </project>
